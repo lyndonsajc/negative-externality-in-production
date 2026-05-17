@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Negative Externality in Production Simulator</title>
+<style>
+:root{--bg:#f6f8ff;--card:#fff;--ink:#182033;--muted:#667085;--blue:#2563eb;--red:#dc2626;--purple:#7c3aed;--green:#059669;--orange:#d97706;--line:#d9e1ef;--soft:#eef4ff}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#edf7ff,#fff7ed);color:var(--ink)}
+header{max-width:1180px;margin:auto;padding:26px 20px 12px}h1{font-size:clamp(26px,4vw,42px);margin:0;letter-spacing:-.03em}.sub{max-width:900px;color:var(--muted);line-height:1.5;font-size:16px}.wrap{max-width:1180px;margin:0 auto 30px;padding:0 18px;display:grid;grid-template-columns:350px 1fr;gap:18px}.card{background:rgba(255,255,255,.94);border:1px solid rgba(217,225,239,.9);border-radius:24px;box-shadow:0 12px 30px rgba(15,23,42,.08);padding:18px}label{font-weight:800;font-size:14px;display:block;margin:14px 0 7px}select,input[type=range]{width:100%}select{padding:10px;border:1px solid var(--line);border-radius:12px;background:white;font-size:14px}input[type=range]{accent-color:var(--blue)}.row{display:flex;gap:10px;align-items:center}.pill{font-size:12px;background:var(--soft);color:#1d4ed8;border-radius:999px;padding:7px 10px;font-weight:800;white-space:nowrap}.hint{font-size:12px;color:var(--muted);line-height:1.4;margin-top:4px}.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}button{border:0;border-radius:14px;padding:11px 12px;font-weight:900;cursor:pointer;background:#e2e8f0;color:#1f2937}button.primary{background:var(--blue);color:#fff}canvas{width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:18px}.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.key{font-size:12px;background:#f1f5f9;border-radius:999px;padding:6px 9px}.dot{display:inline-block;width:18px;height:3px;border-radius:4px;margin-right:5px;vertical-align:middle}.mpb{background:var(--blue)}.mpc{background:var(--red)}.msc{background:var(--purple)}.new{background:#111827}.old{background:#94a3b8}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.stat{background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:11px}.stat b{font-size:20px;display:block}.stat span{font-size:12px;color:var(--muted)}.feedback{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.box{border:1px solid #e5e7eb;border-radius:16px;padding:14px;background:#fff;line-height:1.45}.box h3{margin:0 0 6px;font-size:15px}.why{border-left:5px solid var(--blue)}.exam{border-left:5px solid var(--orange)}.success{border-left:5px solid var(--green)}.warn{border-left:5px solid var(--red)}.small{font-size:12px;color:var(--muted);margin-top:12px}.tag{display:inline-block;font-size:12px;border-radius:999px;padding:5px 8px;background:#ecfeff;color:#155e75;font-weight:800;margin-right:6px;margin-top:6px}@media(max-width:900px){.wrap{grid-template-columns:1fr}.stats,.feedback{grid-template-columns:1fr 1fr}}@media(max-width:620px){.stats,.feedback{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<h1>Negative Externality in Production Simulator</h1>
+<p class="sub">For H2 Economics: use the sliders to show how pollution from production creates <b>MEC</b>, causing <b>MSC &gt; MPC</b>, overproduction, and deadweight loss. Then test policies such as tax, quota, tradable permits, regulation, and cleaner technology.</p>
+</header>
+<div class="wrap">
+<section class="card">
+<label>Context</label>
+<select id="context">
+<option value="aluminium">Production of aluminium: air pollution</option>
+<option value="factory">Factory production: toxic waste / river pollution</option>
+<option value="electricity">Electricity generation: carbon emissions</option>
+</select>
+<label>Marginal External Cost, MEC</label>
+<div class="row"><input id="mec" type="range" min="0" max="90" value="45"><span class="pill" id="mecVal">45</span></div>
+<div class="hint">Higher MEC means larger external cost borne by third parties, so MSC shifts further above MPC.</div>
+<label>Policy</label>
+<select id="policy">
+<option value="none">No government intervention</option>
+<option value="tax">Per-unit tax equal to MEC at Qs</option>
+<option value="quota">Quota: restrict output to Qs</option>
+<option value="permits">Tradable permits: price of permit internalises MEC</option>
+<option value="regulation">Regulation: compulsory emission-reduction devices</option>
+<option value="clean">Cleaner technology subsidy / adoption</option>
+<option value="ban">Total ban</option>
+</select>
+<label id="strengthLabel">Policy strength</label>
+<div class="row"><input id="strength" type="range" min="0" max="100" value="70"><span class="pill" id="strengthVal">70%</span></div>
+<div class="hint" id="strengthHint">Adjust how strongly the selected policy affects output or MEC.</div>
+<label>Show diagram features</label>
+<div class="btns"><button id="toggleDwl" class="primary">DWL on</button><button id="resetBtn">Reset</button></div>
+<div class="small"><span class="tag">Free market: MPB = MPC</span><span class="tag">Social optimum: MSB = MSC</span><span class="tag">Negative externality: MSC &gt; MPC</span></div>
+</section>
+<section class="card">
+<canvas id="graph" width="820" height="540"></canvas>
+<div class="legend">
+<span class="key"><i class="dot mpb"></i>MPB = MSB</span>
+<span class="key"><i class="dot mpc"></i>MPC</span>
+<span class="key"><i class="dot msc"></i>MSC before policy</span>
+<span class="key"><i class="dot new"></i>After policy</span>
+<span class="key"><i class="dot old"></i>Guide lines</span>
+</div>
+<div class="stats">
+<div class="stat"><b id="qp">-</b><span>Free market output, Qp</span></div>
+<div class="stat"><b id="qs">-</b><span>Social optimum, Qs</span></div>
+<div class="stat"><b id="qa">-</b><span>Output after policy</span></div>
+<div class="stat"><b id="dwl">-</b><span>Deadweight loss index</span></div>
+</div>
+<div class="feedback">
+<div class="box why"><h3>Why the curve shifts</h3><p id="why"></p></div>
+<div class="box exam"><h3>Exam explanation</h3><p id="exam"></p></div>
+<div class="box success"><h3>Policy impact</h3><p id="impact"></p></div>
+<div class="box warn"><h3>Evaluation point</h3><p id="eval"></p></div>
+</div>
+</section>
+</div>
+<script>
+const $=id=>document.getElementById(id);let showDwl=true;const canvas=$('graph'),ctx=canvas.getContext('2d');
+const margin={l:72,r:32,t:34,b:62},W=canvas.width,H=canvas.height,gw=W-margin.l-margin.r,gh=H-margin.t-margin.b;
+function x(q){return margin.l+(q/150)*gw}function y(p){return margin.t+gh-(p/170)*gh}function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function demand(q){return 150-0.7*q}function mpc(q){return 25+0.45*q}function intersect(costShift){return (150-25-costShift)/(0.45+0.7)}
+function line(fn,color,width=3,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();for(let q=0;q<=150;q++){const px=x(q),py=y(fn(q));if(q===0)ctx.moveTo(px,py);else ctx.lineTo(px,py)}ctx.stroke();ctx.restore()}
+function vline(q,color='#94a3b8'){ctx.save();ctx.strokeStyle=color;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(x(q),y(0));ctx.lineTo(x(q),y(160));ctx.stroke();ctx.restore()}
+function label(txt,px,py,color='#111827',align='center'){ctx.fillStyle=color;ctx.font='bold 13px Arial';ctx.textAlign=align;ctx.fillText(txt,px,py)}
+function contextText(){const c=$('context').value; if(c==='aluminium')return ['aluminium','residents near the factory face health costs from air pollution']; if(c==='factory')return ['factory output','third parties face river pollution and clean-up costs']; return ['electricity','society faces carbon emissions and environmental damage'];}
+function draw(){const mec=+$('mec').value,pol=$('policy').value,s=+$('strength').value/100; $('mecVal').textContent=mec; $('strengthVal').textContent=Math.round(s*100)+'%';
+const Qp=intersect(0), Qs=clamp(intersect(mec),0,150); let Qa=Qp, afterShift=mec, afterType='msc';
+let why='', exam='', impact='', evalp='', hint='Adjust how strongly the selected policy affects output or MEC.';
+const [good,third]=contextText();
+if(pol==='none'){Qa=Qp;afterShift=mec;why='No policy is used, so producers only consider MPC. MEC remains external and MSC stays above MPC.';impact='Output remains at Qp, where MPB = MPC. The market still overproduces because Qp is greater than Qs.';evalp='No intervention means no administrative cost, but market failure remains because third-party costs are ignored.'}
+if(pol==='tax'){afterShift=mec*s; Qa=intersect(afterShift); why='A per-unit tax raises producers’ private cost. MPC shifts upward towards MSC because firms are forced to internalise part of the external cost.'; impact=s>0.95?'If the tax equals MEC at Qs, output falls to Qs and deadweight loss is eliminated.':'A partial tax raises MPC, so output moves closer to Qs but deadweight loss remains.'; evalp='The government needs accurate information on MEC. If the tax is too low, output remains above Qs; if too high, output may fall below Qs.'}
+if(pol==='quota'){Qa=Qp-(Qp-Qs)*s; afterShift=mec; afterType='quota'; why='A quota does not shift MPC or MSC. Instead, it directly restricts the legal level of production.'; impact=s>0.95?'If the quota is set at Qs, overproduction is removed.':'The quota reduces production, but if it is not set exactly at Qs, some welfare loss remains.'; evalp='Quota gives certainty over output, but monitoring and enforcement costs may be high. Firms also have little incentive to reduce pollution below the legal limit.'; hint='100% sets the quota exactly at Qs. Lower values only partially restrict output.'}
+if(pol==='permits'){afterShift=mec*s; Qa=intersect(afterShift); why='Tradable permits create a price for the right to pollute. This permit price acts like an added cost, shifting MPC upward towards MSC.'; impact=s>0.95?'If permit price fully reflects MEC, producers internalise the external cost and output falls to Qs.':'Output falls towards Qs as the permit price raises private production costs.'; evalp='The government must issue the correct number of permits. Some firms may continue polluting if buying permits is cheaper than cleaner production.'}
+if(pol==='regulation'){afterShift=mec*(1-s*0.85); Qa=Qp; why='Regulation requiring emission-reduction devices lowers MEC. Since MSC = MPC + MEC, a lower MEC shifts MSC downward towards MPC.'; impact='The socially optimal output rises from the original Qs because each unit now creates less external cost. The deadweight loss becomes smaller.'; evalp='Regulation may reduce but not remove pollution. It also requires checks, enforcement and penalties that are strong enough to change firm behaviour.'; hint='Higher strength means cleaner equipment reduces a larger share of MEC.'}
+if(pol==='clean'){afterShift=mec*(1-s*0.95); Qa=Qp; why='Cleaner technology lowers pollution per unit of output. This reduces MEC, so MSC shifts downward towards MPC.'; impact='Because production is cleaner, the gap between MSC and MPC narrows. The socially optimal output moves closer to the free-market output and DWL falls.'; evalp='Effectiveness depends on adoption rate, cost of technology and whether firms have enough incentive to use it properly.'; hint='Higher strength means technology removes more MEC.'}
+if(pol==='ban'){Qa=Qp*(1-s); afterShift=mec; afterType='ban'; why='A ban does not shift MPC or MSC. It directly reduces legal production, possibly to zero.'; impact=s>0.95?'A total ban reduces output to zero. This may be justified only when MEC is extremely large.':'A partial ban reduces output below the free-market level.'; evalp='A total ban may create welfare loss if some socially beneficial output should still be produced. Enforcement can also be costly.'; hint='100% means a total ban. Lower values mean a partial ban.'}
+const QsAfter=clamp(intersect(afterShift),0,150); let dwlIndex=Math.max(0,Math.abs(Qa-QsAfter)*Math.max(1,afterShift)/2);
+ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.strokeStyle='#111827';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(margin.l,margin.t);ctx.lineTo(margin.l,H-margin.b);ctx.lineTo(W-margin.r,H-margin.b);ctx.stroke();
+label('Costs / Benefits of producing '+good,margin.l-48,margin.t+12,'#111827','left');label('Quantity of '+good,W/2,H-18);
+for(let p=0;p<=150;p+=50){ctx.strokeStyle='#eef2f7';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(margin.l,y(p));ctx.lineTo(W-margin.r,y(p));ctx.stroke();ctx.fillStyle='#64748b';ctx.font='11px Arial';ctx.textAlign='right';ctx.fillText(p,margin.l-8,y(p)+4)}
+if(showDwl && pol!=='regulation' && pol!=='clean'){ctx.fillStyle='rgba(220,38,38,.15)';ctx.beginPath();ctx.moveTo(x(Qs),y(demand(Qs)));ctx.lineTo(x(Qp),y(demand(Qp)));ctx.lineTo(x(Qp),y(mpc(Qp)+mec));ctx.closePath();ctx.fill();label('DWL',x((Qs+Qp)/2)+22,y((demand(Qp)+mpc(Qp)+mec)/2),'#dc2626')}
+if(showDwl && (pol==='regulation'||pol==='clean')){ctx.fillStyle='rgba(5,150,105,.12)';ctx.beginPath();ctx.moveTo(x(QsAfter),y(demand(QsAfter)));ctx.lineTo(x(Qp),y(demand(Qp)));ctx.lineTo(x(Qp),y(mpc(Qp)+afterShift));ctx.closePath();ctx.fill();label('smaller DWL',x((QsAfter+Qp)/2)+35,y((demand(Qp)+mpc(Qp)+afterShift)/2),'#059669')}
+line(q=>demand(q),'#2563eb',3);line(q=>mpc(q),'#dc2626',3);line(q=>mpc(q)+mec,'#7c3aed',3); if(pol==='tax'||pol==='permits')line(q=>mpc(q)+afterShift,'#111827',4,[8,5]); if(pol==='regulation'||pol==='clean')line(q=>mpc(q)+afterShift,'#111827',4,[8,5]);
+vline(Qp);vline(Qs); if(Math.abs(Qa-Qp)>1)vline(Qa,'#111827'); if((pol==='regulation'||pol==='clean')&&Math.abs(QsAfter-Qs)>1)vline(QsAfter,'#059669');
+label('MPB = MSB',x(103),y(demand(103))-8,'#2563eb');label('MPC',x(122),y(mpc(122))+18,'#dc2626');label('MSC',x(95),y(mpc(95)+mec)-10,'#7c3aed'); if(pol!=='none')label('After policy',x(70),y(mpc(70)+afterShift)-12,'#111827');
+label('Qp',x(Qp),H-margin.b+22);label('Qs',x(Qs),H-margin.b+22); if(Math.abs(Qa-Qp)>1)label('Qa',x(Qa),H-margin.b+39,'#111827'); if((pol==='regulation'||pol==='clean'))label('new Qs',x(QsAfter),H-margin.b+39,'#059669');
+if(afterType==='quota'){ctx.fillStyle='rgba(17,24,39,.08)';ctx.fillRect(x(Qa),margin.t,3,gh);label('quota',x(Qa)+18,margin.t+20,'#111827')}
+if(afterType==='ban'){ctx.fillStyle='rgba(17,24,39,.08)';ctx.fillRect(margin.l,margin.t,x(Qa)-margin.l,gh);label('allowed output',x(Qa)/2+20,margin.t+20,'#111827')}
+$('qp').textContent=Math.round(Qp);$('qs').textContent=Math.round(Qs);$('qa').textContent=Math.round(Qa);$('dwl').textContent=Math.round(dwlIndex);
+$('why').textContent=why || ('Production creates external costs: '+third+'. Since MEC > 0, MSC = MPC + MEC and lies above MPC.');
+$('exam').textContent='Producers maximise private welfare/profit by producing where MPB = MPC at Qp. Society prefers output where MSB = MSC at Qs. Since Qp > Qs, there is overproduction and over-allocation of resources to '+good+'.';
+$('impact').textContent=impact;$('eval').textContent=evalp;$('strengthHint').textContent=hint;
+}
+['context','mec','policy','strength'].forEach(id=>$(id).addEventListener('input',draw));$('toggleDwl').onclick=()=>{showDwl=!showDwl;$('toggleDwl').textContent=showDwl?'DWL on':'DWL off';$('toggleDwl').className=showDwl?'primary':'';draw()};$('resetBtn').onclick=()=>{$('mec').value=45;$('policy').value='none';$('strength').value=70;showDwl=true;$('toggleDwl').textContent='DWL on';$('toggleDwl').className='primary';draw()};draw();
+</script>
+</body>
+</html>
